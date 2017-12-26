@@ -55,6 +55,7 @@ App = {
 
   bindEvents: function() {
     $(document).on('click', '.btn-adopt', App.handleAdopt);
+    $(document).on('click', '.btn-send', App.handleSend);
   },
 
   markAdopted: function(adopters, account) {
@@ -73,11 +74,12 @@ App = {
 
         for (i = 0; i < adopters.length; i++) {
           if (adopters[i] !== '0x0000000000000000000000000000000000000000') {
-            $('.panel-pet').eq(i).find('button').text('Success').attr('disabled', true);
+            $('.panel-pet').eq(i).find('.btn-adopt').text('Success').attr('disabled', true);
             if (adopters[i] == account) {
-              $('.panel-pet').eq(i).find('.pet-owner').text('You').attr('disabled', true);
+              $('.panel-pet').eq(i).find('.pet-owner').text('You');
+              $('.panel-pet').eq(i).find('.btn-send').attr('disabled', false);
             } else {
-              $('.panel-pet').eq(i).find('.pet-owner').text('Someone Else').attr('disabled', true);
+              $('.panel-pet').eq(i).find('.pet-owner').text('Someone Else');
             }
           }
         }
@@ -109,6 +111,37 @@ App = {
         return adoptionInstance.adopt(petId, {from: account});
       }).then(function(result) {
         console.log("Addopted!");
+        return App.markAdopted();
+      }).catch(function(err) {
+        console.log(err.message);
+      });
+    });
+  },
+
+  handleSend: function(event) {
+    event.preventDefault();
+
+    var petId = parseInt($(event.target).data('id'));
+    var sendAddress = $('.panel-pet').eq(petId).find('.input-send-address').val();
+    
+    var adoptionInstance;
+
+    web3.eth.getAccounts(function(error, accounts) {
+      if (error) {
+        console.log(error);
+      }
+
+      var account = accounts[0];
+      console.log(account);
+      console.log(sendAddress);
+
+      App.contracts.Adoption.deployed().then(function(instance) {
+        adoptionInstance = instance;
+
+        // Execute adopt as a transaction by sending account
+        return adoptionInstance.sendPet(petId, sendAddress, {from: account});
+      }).then(function(result) {
+        console.log("Sent Pet!");
         return App.markAdopted();
       }).catch(function(err) {
         console.log(err.message);

@@ -36,4 +36,13 @@ contract TestAdoption {
 
         Assert.equal(adopters[8], expected, "Owner of pet ID 8 should be recorded.");
     }
+
+    function testPetSending() public {
+        adoption.sendPet(8, address(20));
+
+        address expected = address(20);
+        address adopter = adoption.adopters(8);
+
+        Assert.equal(adopter, expected, "New owner of sent pet should be recorded.");
+    }
 }

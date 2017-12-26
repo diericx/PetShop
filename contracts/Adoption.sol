@@ -12,6 +12,13 @@ contract Adoption {
         return petId;
     }
 
+    function sendPet(uint petId, address newOwner) public {
+        require(newOwner != address(0));
+        require(adopters[petId] == msg.sender);
+
+        adopters[petId] = newOwner;
+    }
+
     function getAdopters() public view returns (address[16]) {
         return adopters;
     }
